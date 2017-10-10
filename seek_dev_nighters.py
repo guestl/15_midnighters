@@ -6,7 +6,7 @@ from datetime import datetime
 
 def load_single_page(page_number):
     url = 'http://devman.org/api/challenges/solution_attempts/'
-    result = None
+    result_dict = None
 
     payloads = {'page': page_number}
 
@@ -14,10 +14,10 @@ def load_single_page(page_number):
 
     try:
         if req.status_code == requests.codes.ok:
-            result = json.loads(req.text)['records']
-        return result
+            result_dict = json.loads(req.text)['records']
+        return result_dict
     except ValueError:
-        exit("Error with content of the page {}".format(req.url))
+        return None
 
 
 def load_attempts():
@@ -28,17 +28,17 @@ def load_attempts():
         if not single_page_dict:
             exit('Error with load page {}'.format(page))
 
-        for item in single_page_dict:
+        for user_record in single_page_dict:
             yield {
-                'username': item['username'],
-                'timestamp': item['timestamp'],
-                'timezone': item['timezone'],
+                'username': user_record['username'],
+                'timestamp': user_record['timestamp'],
+                'timezone': user_record['timezone'],
             }
 
 
 def get_midnighters(single_record, morning_hour):
     midnighters_hours = {hour for hour in range(morning_hour)}
-    result = None
+    result_username = None
 
     if single_record['timestamp'] and single_record['timezone']:
         user_tz = pytz.timezone(single_record['timezone'])
@@ -48,14 +48,14 @@ def get_midnighters(single_record, morning_hour):
             user_utc_time), is_dst=None).astimezone(user_tz)
 
         if user_local_time.hour in midnighters_hours:
-            result = single_record['username']
+            result_username = single_record['username']
 
-    return result
+    return result_username
 
 
 if __name__ == '__main__':
     morning_hour = 5
-    for item in load_attempts():
-        midnighter = get_midnighters(item, morning_hour)
+    for page_load_attempt in load_attempts():
+        midnighter = get_midnighters(page_load_attempt, morning_hour)
         if midnighter:
             print(midnighter)
