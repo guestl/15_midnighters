@@ -26,7 +26,7 @@ def load_attempts():
         single_page_dict = load_single_page(page)
 
         if not single_page_dict:
-            exit('Error with load page {}'.format(page))
+            yield None
 
         for user_record in single_page_dict:
             yield {
@@ -56,6 +56,7 @@ def get_midnighters(single_record, morning_hour):
 if __name__ == '__main__':
     morning_hour = 5
     for page_load_attempt in load_attempts():
-        midnighter = get_midnighters(page_load_attempt, morning_hour)
-        if midnighter:
-            print(midnighter)
+        if page_load_attempt:
+            midnighter = get_midnighters(page_load_attempt, morning_hour)
+            if midnighter:
+                print(midnighter)
