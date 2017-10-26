@@ -65,6 +65,9 @@ if __name__ == '__main__':
     hour_of_night_stop = 5
     pages_amount = get_pages_amount(url)
 
+    if pages_amount is None:
+        exit("Error while loading a page")
+
     for page_load_attempt in load_attempts(url, pages_amount):
         if page_load_attempt:
             midnighter = get_midnighters(page_load_attempt, hour_of_night_stop)
